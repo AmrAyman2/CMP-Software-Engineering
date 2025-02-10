@@ -31,22 +31,57 @@ function fetchEmployees() {
 
 // TODO
 // add event listener to submit button
+document.getElementById("employeeForm").addEventListener("submit", (event) => {
+  event.preventDefault(); 
+  createEmployee();
+});
 
 // TODO
 // add event listener to delete button
+document.getElementById("dataTable").addEventListener("click", deleteEmployee);
 
 // TODO
-function createEmployee (){
+async function createEmployee (){
   // get data from input field
   // send data to BE
   // call fetchEmployees
+  
+  const name = document.getElementById("name").value;
+  const id = document.getElementById("id").value;
+  const employeeData = {id,name};
+  try {
+    await fetch("http://localhost:3000/api/v1/employee", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(employeeData)
+    });
+
+    fetchEmployees(); 
+  } catch (error) {
+    console.error("Error adding employee:", error);
+  }
+  fetchEmployees();
+
 }
 
 // TODO
-function deleteEmployee (){
-  // get id
-  // send id to BE
-  // call fetchEmployees
+async function deleteEmployee(event) {
+  try {
+    if (!event.target.classList.contains("btn-danger")) return;
+    const row = event.target.closest("tr"); //find closes row (current)
+    const id = row.cells[0].textContent;
+
+    const response = await fetch(`http://localhost:3000/api/v1/employee/${id}`, {
+      method: "DELETE",
+      headers: {"Content-Type": "application/json"}
+    });
+    if (!response.ok) {
+      throw new Error("error deleting");
+    }
+    await fetchEmployees(); 
+  } catch (error) {
+    console.error("Error:", error);
+  }
 }
 
 fetchEmployees()
